@@ -11,9 +11,11 @@ class Variables(object):
     
     Class that packages the access to/storage of variables
     '''
-    def __init__(self, source = "Unknown"):
+    def __init__(self, source = "Unknown", variables = None):
         self.variables = {}
         self.source = source
+        if variables is not None:
+            self.update(variables)
         
     def update(self, other):
         self.variables.update(other.variables)
@@ -54,8 +56,10 @@ class Characters(object):
 class Substituter(object):
     '''
     '''
-    def __init__(self):
+    def __init__(self, variables = None):
         self.env = {}
+        if variables is not None:
+            self.env = variables
 
     def with_env(self, env):
         all_env = self.env.copy()

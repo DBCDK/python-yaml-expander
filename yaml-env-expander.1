@@ -1,0 +1,84 @@
+.TH yaml-env-expander 1 "Mon Apr 29" "version 0.9" ""
+
+.SH NAME
+
+yaml-env-expander
+
+.SH SYNOPSIS
+
+yaml-env-expander
+.B [ --env
+.I KEY=VALUE
+.B ... ] [ --env-file
+.I FILE
+.B ... ] [ --src
+.I DIR
+.B ] [ --dest
+.I DIR
+.B ] [file ...]
+
+.SH DESCRIPTION
+
+Copy yaml files from one location to an other, expanding standard environment variables syntax in the values.
+
+Technically this doesn't do environment expansion, sinde nothing is taken from the evironment, but everything
+is declared on the command line / in files.
+
+.SH OPTIONS
+
+.B --env
+.I KEY=VALUE
+.RS
+Set a variable to be expanded
+.RE
+
+.B --env-file
+.I FILE
+.RS
+This reads a file. Every line with content should have the syntax KEY=VALUE
+.B <newline>
+
+Comments are supported with the
+.B #
+syntax
+.RE
+
+.B --src
+.I DIR
+.RS
+The directory under which the files should be located (defaults to .)
+.RE
+
+.B --dest
+.I DIR
+.RS
+The directory under which the files should be put (defaults to . resulting in overwriting of source files)
+.RE
+
+.I file
+.RS
+File(s) to expand in, if none are declared, then every file under
+.B --src
+.I DIR
+that ends with:
+.B .yaml
+or
+.B .yml
+.RE
+
+
+.SH NOTES
+
+An extra variable
+.B 0
+is the basename of the file processed
+
+There's no quotes or similar in environment files for multi word values. The value is taken verbatim, with all trailing whitespace.
+
+.SH BUGS
+Plenty
+
+.SH AUTHOR
+
+Dansk BiblioteksCenter A/S
+

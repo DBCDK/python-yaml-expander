@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+from yaml_expander.yaml_expander import Variables, Substituter
+import argparse
+import os
+import yaml
+
+
+def read_yaml(filename):
+    with open(filename) as stream:
+        return yaml.load(stream)
+
+def write_yaml(filename, content):
+    with open(filename, 'w') as stream:
+        yaml.dump(content, stream, default_flow_style=False)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Expand environment variables in YAML.')
+    parser.add_argument('files', metavar='FILE', nargs='+',
+                        help='Files to substitute variables in')
+    parser.add_argument('--env', metavar='ENV', dest='env', action='append', default=[],
+                        help='environment variables (repeatable)')
+    parser.add_argument('--env-file', metavar='ENV-FILE', dest='envfile', action='append', default=[],
+                        help='files with environment variables (repeatable)')
+    parser.add_argument('--dest', metavar='DESTINATION-DIRECTORY', dest='dest', default=".",
+                        help='directory base for FILE output')
+    parser.add_argument('--src', metavar='SOURCE-DIRECTORY', dest='src', default=".",
+                        help='directory base for FILE input')
+    args = parser.parse_args()
+
+    if not os.path.isdir(args.src):
+        raise Exception("Source directory (%s) is not a directory?" % args.src)
+    if not os.path.isdir(args.dest) and not os.mkdir(args.dest):
+        raise Exception("Destination directory (%s) is not a directory?" % args.dest)
+
+    file_variables = Variables()
+    cmdline_variables = Variables("command line")
+
+    for filename in args.envfile:
+        file_variables.read_variables(filename)
+    
+    for arg in args.env:
+        cmdline_variables.set_var(arg)
+
+    subst = Substituter().with_env(file_variables.env()).with_env(cmdline_variables.env())
+
+    if len(args.files) == 0:
+        for dirname, subdirs, files in os.walk(args.src):
+            rpath = os.path.relpath(dirname, args.src)
+            args.files += [ os.path.join(rpath, file) for file in files if file.endswith('.yaml') or file.endswith('.yml')]
+        if len(args.files) == 0:
+            raise Exception("No files found to process")
+
+
+    for filename in args.files:
+        self_name = os.path.basename(filename)
+        self_name = os.path.splitext(self_name)[0]
+        srcfile = os.path.abspath(os.path.join(args.src, filename))
+        destfile = os.path.abspath(os.path.join(args.dest, filename))
+        destdir = os.path.dirname(destfile)
+        if not os.path.exists(destdir):
+            os.mkdir(destdir)
+        print(srcfile, "->", destfile)
+        yaml_content = read_yaml(srcfile)
+        yaml_substituted = subst.with_env({"0": self_name}).traverse(yaml_content)
+        write_yaml(destfile, yaml_substituted)
+    

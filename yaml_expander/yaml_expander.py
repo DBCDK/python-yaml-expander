@@ -32,7 +32,7 @@ class Variables(object):
         variables = Variables(filename);
         with open(filename) as stream:
             for line in stream:
-                if re.match('^\s*(?:#.*)?$', line) is None:
+                if re.match('^\s*(?:#.*)?$', line) is not None:
                     continue
                 variables.set_var(line)
         self.update(variables)
@@ -68,7 +68,7 @@ class Substituter(object):
         
     def expand(self, var):
         expanded = []
-        chars = Substituter.Characters(var)
+        chars = Characters(var)
         c = chars.get()
         while c is not None:
             if c is '\\':
@@ -109,7 +109,14 @@ class Substituter(object):
             else:
                 expanded.append(c)
                 c = chars.get()
-        return ''.join(expanded)
+        s = ''.join(expanded)
+        if re.match('^\d+$', s):
+            return int(s)
+        if s.lower() in ['yes', 'true']:
+            return True
+        if s.lower() in ['no', 'false']:
+            return False
+        return s
 
     def traverse(self, obj):
         if isinstance(obj, dict):

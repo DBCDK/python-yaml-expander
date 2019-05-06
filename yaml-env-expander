@@ -65,10 +65,13 @@ if __name__ == "__main__":
         local_subst = subst
         extra_log = ""
         if os.path.exists(local_env_file):
-            extra_log = " using " + local_env_file
-            local_env = Variables()
-            local_env.read_variables(local_env_file)
-            local_subst = local_subst.with_env(local_env.env())
+            if args.skip_local_env:
+                extra_log = " _NOT_ using " + local_env_file
+            else:
+                extra_log = " using " + local_env_file
+                local_env = Variables()
+                local_env.read_variables(local_env_file)
+                local_subst = local_subst.with_env(local_env.env())
         local_subst = local_subst.with_env(cmdline_variables.env())
             
         

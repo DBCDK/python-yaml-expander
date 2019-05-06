@@ -19,6 +19,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Expand environment variables in YAML.')
     parser.add_argument('files', metavar='FILE', nargs='*',
                         help='Files to substitute variables in')
+    parser.add_argument('--skip-local-env', dest='skip_local_env', action='store_true',
+                        help='skip .env file for each yaml file')
     parser.add_argument('--env', metavar='ENV', dest='env', action='append', default=[],
                         help='environment variables (repeatable)')
     parser.add_argument('--env-file', metavar='ENV-FILE', dest='envfile', action='append', default=[],
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     for arg in args.env:
         cmdline_variables.set_var(arg)
 
-    subst = Substituter().with_env(file_variables.env()).with_env(cmdline_variables.env())
+    subst = Substituter().with_env(file_variables.env())
 
     if len(args.files) == 0:
         for dirname, subdirs, files in os.walk(args.src):
@@ -59,10 +61,21 @@ if __name__ == "__main__":
         srcfile = os.path.abspath(os.path.join(args.src, filename))
         destfile = os.path.abspath(os.path.join(args.dest, filename))
         destdir = os.path.dirname(destfile)
+        local_env_file = os.path.splitext(srcfile)[0] + ".env"
+        local_subst = subst
+        extra_log = ""
+        if os.path.exists(local_env_file):
+            extra_log = " using " + local_env_file
+            local_env = Variables()
+            local_env.read_variables(local_env_file)
+            local_subst = local_subst.with_env(local_env.env())
+        local_subst = local_subst.with_env(cmdline_variables.env())
+            
+        
         if not os.path.exists(destdir):
             os.mkdir(destdir)
-        print(srcfile, "->", destfile)
+        print(srcfile + " -> " + destfile + extra_log)
         yaml_content = read_yaml(srcfile)
-        yaml_substituted = subst.with_env({"0": self_name}).traverse(yaml_content)
+        yaml_substituted = local_subst.with_env({"0": self_name}).traverse(yaml_content)
         write_yaml(destfile, yaml_substituted)
     

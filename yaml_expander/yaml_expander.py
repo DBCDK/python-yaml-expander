@@ -96,7 +96,7 @@ class Substituter(object):
                     env.append(c)
                     while c is not None:
                         c = chars.get()
-                        if c is not None and (c.isalnum() in "-_"):
+                        if c is not None and (c.isalnum() or c in "-_"):
                             env.append(c)
                         else:
                             break

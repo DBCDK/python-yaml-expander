@@ -8,11 +8,11 @@ import yaml
 
 def read_yaml(filename):
     with open(filename) as stream:
-        return yaml.load(stream)
+        return [ y for y in yaml.safe_load_all(stream) ]
 
 def write_yaml(filename, content):
     with open(filename, 'w') as stream:
-        yaml.dump(content, stream, default_flow_style=False)
+        yaml.safe_dump_all(content, stream, default_flow_style=False,  explicit_start=len(content)>1)
 
 
 if __name__ == "__main__":
@@ -73,12 +73,12 @@ if __name__ == "__main__":
                 local_env.read_variables(local_env_file)
                 local_subst = local_subst.with_env(local_env.env())
         local_subst = local_subst.with_env(cmdline_variables.env())
-            
+        local_subst = local_subst.with_env({"0": self_name})
         
         if not os.path.exists(destdir):
             os.mkdir(destdir)
         print(srcfile + " -> " + destfile + extra_log)
         yaml_content = read_yaml(srcfile)
-        yaml_substituted = local_subst.with_env({"0": self_name}).traverse(yaml_content)
+        yaml_substituted = local_subst.traverse(yaml_content)
         write_yaml(destfile, yaml_substituted)
     

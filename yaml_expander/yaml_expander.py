@@ -21,7 +21,7 @@ class Variables(object):
         self.variables.update(other.variables)
     
     def set_var(self, variable):
-        if re.match('^[_a-zA-Z0-9]+\s*=', variable) is None:
+        if re.match('^[_a-zA-Z0-9_-]+\s*=', variable) is None:
             raise Exception("Unparsable variable '%s' from %s" % (variable, self.source))
         (k, v) =  [ x.strip() for x in variable.split("=", 2) ]
         if k in self.variables:
@@ -85,7 +85,7 @@ class Substituter(object):
                         c = chars.get()
                         if c is '}':
                             break
-                        elif c.isalnum():
+                        elif c.isalnum() or c in "-_":
                             env.append(c)
                         elif c is None:
                             raise Exception("Unclosed ${ in: %s" % var)
@@ -96,7 +96,7 @@ class Substituter(object):
                     env.append(c)
                     while c is not None:
                         c = chars.get()
-                        if c is not None and c.isalnum():
+                        if c is not None and (c.isalnum() or c in "-_"):
                             env.append(c)
                         else:
                             break

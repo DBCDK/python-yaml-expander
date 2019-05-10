@@ -51,7 +51,13 @@ class Characters(object):
             return self.chars.__next__()
         except StopIteration as e:
             return None
-        
+
+convertors = {
+        'lower': lambda s: s.lower(),
+        'upper': lambda s: s.upper(),
+        'bool': lambda s: s.lower() in [ '1', 'yes', 'true' ],
+        'int': lambda s:  int(s)
+}
 
 class Substituter(object):
     '''
@@ -70,6 +76,7 @@ class Substituter(object):
         expanded = []
         chars = Characters(var)
         c = chars.get()
+        convert = lambda s: s
         while c is not None:
             if c is '\\':
                 c = chars.get()
@@ -89,6 +96,9 @@ class Substituter(object):
                             env.append(c)
                         elif c is None:
                             raise Exception("Unclosed ${ in: %s" % var)
+                        elif c is ':':
+                            convert = self.read_convertor(chars, var)
+                            break
                         else:
                             raise Exception("Invalid character in ${: %s" % c)
                     c = chars.get()
@@ -110,13 +120,19 @@ class Substituter(object):
                 expanded.append(c)
                 c = chars.get()
         s = ''.join(expanded)
-        if re.match('^\d+$', s):
-            return int(s)
-        if s.lower() in ['true']:
-            return True
-        if s.lower() in ['false']:
-            return False
-        return s
+        return convert(s);
+
+    def read_convertor(self, chars, var):
+        c = chars.get()
+        s = ''
+        while c is not None:
+            if c is '}':
+                if s not in convertors:
+                    raise Exception("unknown convertor: :%s in %s" %(s, var))
+                return convertors[s]
+            s = s + c
+            c = chars.get()
+        raise Exception("Unclosed ${ in: %s" % var)
 
     def traverse(self, obj):
         if isinstance(obj, dict):

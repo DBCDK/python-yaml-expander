@@ -112,9 +112,9 @@ class Substituter(object):
         s = ''.join(expanded)
         if re.match('^\d+$', s):
             return int(s)
-        if s.lower() in ['yes', 'true']:
+        if s.lower() in ['true']:
             return True
-        if s.lower() in ['no', 'false']:
+        if s.lower() in ['false']:
             return False
         return s
 

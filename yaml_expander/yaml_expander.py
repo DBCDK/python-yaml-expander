@@ -23,7 +23,7 @@ class Variables(object):
     def set_var(self, variable):
         if re.match('^\s*[_a-zA-Z0-9][-_a-zA-Z0-9]*\s*=', variable) is None:
             raise Exception("Unparsable variable '%s' from %s" % (variable, self.source))
-        (k, v) =  [ x.strip() for x in variable.split("=", 2) ]
+        (k, v) =  [ x.strip() for x in variable.split("=", 1) ]
         if k in self.variables:
             raise Exception("variable %s is set twice from: %s" % (k, self.source))
         self.variables[k] =  v

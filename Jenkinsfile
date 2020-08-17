@@ -1,5 +1,5 @@
 pipeline {
-    agent { label "stretch" }
+    agent { label "buster" }
     triggers {
         pollSCM("H/3 * * * *")
     }
@@ -8,7 +8,7 @@ pipeline {
         timestamps()
     }
     environment {
-        RSYNC_TARGET = credentials('debian-rsync-stretch')
+        RSYNC_TARGET = credentials('debian-rsync-buster')
     }
     stages {
         stage("build") {

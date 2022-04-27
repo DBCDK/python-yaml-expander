@@ -11,7 +11,7 @@ setup(
         }
     },
     scripts=['yaml-env-expander'],
-    requires=['yaml'],
+#    requires=['yaml'],
     data_files=[('share/man/man1', ['yaml-env-expander.1'])],
     url='https://github.com/DBCDK/yaml-expander',
     license='gpl3',

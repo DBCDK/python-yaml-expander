@@ -10,6 +10,9 @@ override_dh_python3:
         dh_python3 -O--buildsystem=pybuild
         sed -i 's/^\(python3:Depends=.*\)/\1, python3-yaml/' debian/python3-yaml-expander.substvars
         cat debian/python3-yaml-expander.substvars
+
+override_dh_auto_install:
+        export SETUPTOOLS_USE_DISTUTILS=stdlib && dh_auto_install
 EOT
 
 debuild -us -uc -b
